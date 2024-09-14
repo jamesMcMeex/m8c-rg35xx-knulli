@@ -23,7 +23,7 @@ This version builds using:
 
 1. Clone this repository:
    ```shell
-   git clone https://github.com/yourusername/m8c-build-environment.git
+   git clone https://github.com/jamesMcMeex/m8c-rg35xx-knulli.git
    ```
 
 2. Go into the directory:
