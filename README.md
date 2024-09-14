@@ -28,7 +28,7 @@ This version builds using:
 
 2. Go into the directory:
     ```shell
-    cd m8c-build-environment
+    cd m8c-rg35xx-knulli
     ```
 
 3. Build the Docker image:
