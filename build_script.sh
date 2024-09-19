@@ -58,6 +58,9 @@ done
 if [ -f "/build/m8c/m8c" ]; then
     cp -v /build/m8c/m8c /build/compiled/m8c
     echo "Copied m8c executable"
+    # Set correct permissions for m8c executable
+    chmod +x /build/compiled/m8c/m8c
+    echo "Set execute permissions for m8c executable"
 else
     echo "Error: m8c executable not found"
     exit 1
