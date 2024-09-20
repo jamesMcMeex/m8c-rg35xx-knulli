@@ -73,6 +73,9 @@ cat <<'EOF' >/build/compiled/m8c.sh
 export HOME=$(dirname $(realpath $0))/m8c
 cd $HOME
 
+# Ensure m8c is executable
+chmod +x ./m8c
+
 cp *.ko /lib/modules/4.9.170
 depmod
 modprobe -a cdc-acm snd-hwdep snd-usbmidi-lib snd-usb-audio
