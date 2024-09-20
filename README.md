@@ -45,9 +45,11 @@ This version builds using:
 
    For Mac/Linux:
    ```shell
-   docker run -v $(pwd)/output:/build/compiled m8c-knulli
+   sudo docker run -v $(pwd)/output:/build/compiled m8c-knulli
    ```
-
+   ```shell
+   sudo chown -R $(whoami):$(whoami) output
+   ```
 5. After the build process completes, you'll find the compiled files in a new `output/` directory located inside inside the source directory (`m8c-build-environment`).
 
 ## What's Included
