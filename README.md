@@ -40,12 +40,12 @@ This version builds using:
 
    For Windows (PowerShell):
    ```powershell
-   docker run -v ${PWD}/output:/build/compiled/m8c m8c-knulli
+   docker run -v ${PWD}/output:/build/compiled m8c-knulli
    ```
 
    For Mac/Linux:
    ```shell
-   docker run -v $(pwd)/output:/build/compiled/m8c m8c-knulli
+   docker run -v $(pwd)/output:/build/compiled m8c-knulli
    ```
 
 5. After the build process completes, you'll find the compiled files in a new `output/` directory located inside inside the source directory (`m8c-build-environment`).

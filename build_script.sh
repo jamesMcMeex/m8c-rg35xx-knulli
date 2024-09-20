@@ -58,9 +58,6 @@ done
 if [ -f "/build/m8c/m8c" ]; then
     cp -v /build/m8c/m8c /build/compiled/m8c
     echo "Copied m8c executable"
-    # Set correct permissions for m8c executable
-    chmod +x /build/compiled/m8c/m8c
-    echo "Set execute permissions for m8c executable"
 else
     echo "Error: m8c executable not found"
     exit 1
@@ -72,6 +69,9 @@ cat <<'EOF' >/build/compiled/m8c.sh
 
 export HOME=$(dirname $(realpath $0))/m8c
 cd $HOME
+
+# Ensure m8c is executable
+chmod +x ./m8c
 
 cp *.ko /lib/modules/4.9.170
 depmod
@@ -150,8 +150,5 @@ check_build_output() {
 
 # Run the checks
 check_build_output
-
-# Ensure all output files have the correct permissions
-chmod -R 755 /build/compiled/m8c
 
 echo "Build and check process complete. All compiled files are in /build/compiled/m8c"
