@@ -40,7 +40,7 @@ This version builds using:
 
    For Windows (PowerShell):
    ```powershell
-   docker run -v ${PWD}/output:/build/compiled m8c-knulli
+   docker run -v ${pwd}/output:/build/compiled m8c-knulli
    ```
 
    For Mac/Linux:
