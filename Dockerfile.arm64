@@ -1,0 +1,55 @@
+FROM --platform=linux/arm64 ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update and install required packages
+RUN apt-get update && apt-get install -y \
+    wget \
+    tar \
+    make \
+    gcc \
+    sed \
+    ca-certificates \
+    bc \
+    libssl-dev \
+    pkg-config \
+    dos2unix \
+    libsdl2-dev \
+    build-essential \
+    git \
+    python3 \
+    libserialport-dev \
+    autoconf \
+    automake \
+    libtool \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Download and extract Linux kernel
+RUN wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.9.170.tar.gz && \
+    tar -xzf linux-4.9.170.tar.gz && \
+    rm linux-4.9.170.tar.gz
+
+# Clone m8c directly
+RUN git clone https://github.com/laamaa/m8c.git && \
+    cd m8c && \
+    git checkout v1.7.8
+
+# Download Knulli Linux config file
+RUN wget -O linux-sunxi64-legacy.config https://raw.githubusercontent.com/knulli-cfw/distribution/knulli-main/board/batocera/allwinner/h700/linux-sunxi64-legacy.config
+
+# Set up environment variables for native compilation
+ENV CC=gcc
+ENV CXX=g++
+ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+ENV SDL_CONFIG=/usr/bin/sdl2-config
+
+# Ensure the output directory exists
+RUN mkdir -p /build/compiled/m8c
+
+# Copy the ARM64-specific build script
+COPY build_script.arm64.sh /build/build_script.sh
+RUN chmod +x /build/build_script.sh && dos2unix /build/build_script.sh
+
+CMD ["/bin/bash", "/build/build_script.sh"]
