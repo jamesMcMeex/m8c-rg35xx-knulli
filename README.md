@@ -1,8 +1,10 @@
-# m8c-Knulli Build Environment
+# m8c for the H700 SoC (RG35XX* & RG40XX* devices)
 
-This repository contains a Dockerfile and build script for compiling the [m8c](https://github.com/laamaa/m8c) ([DirtyWave M8 Headless](https://github.com/Dirtywave/M8HeadlessFirmware) Client) and necessary kernel modules for use with [Knulli custom firmware](https://knulli.org/) on the [Anbernic RG35XX*](https://anbernic.com/products/rg35xx-2024-new) family of embedded Linux handheld retro console devices.
+This repository contains a Dockerfile and build script for compiling the [m8c](https://github.com/laamaa/m8c) client for the [DirtyWave M8 Headless](https://github.com/Dirtywave/M8HeadlessFirmware) firmware and necessary kernel modules for Anbernic's Linux-based handheld console devices based on the Allwinner h700 chip. Broadly, these are the RG35XX* & RG40XX* devices
 
-_Note: I have only tested this on an Anbernic RG35XXSP, but others in the Discord community have basically run this on other RG35XX* devices_
+_Note on IRL Anbernic device tests: I have only tested this on an Anbernic RG35XXSP & RG40XXV myself, but others in the Discord community have basically run this on other RG35XX* & RG40XX* devices_
+
+_Note on custom firmware on ANbernic device: This uses tooling from the Knulli CFW project. It might work on other custom firmwares, but I haven't tested them (yet)_
 
 ## Overview
 
@@ -10,17 +12,18 @@ The idea behind this is to provide a platform that makes it relatively easy for 
 
 ## Requirements
 
-- Docker
 - Git
+- Docker
 
 ## Dependencies
 This version builds using:
 - Linux kernel `v4.9.170`
-- Knulli RG35XX Plus/H/2024 toolchain `rg35xx-plush-sdk-20240421/aarch64-buildroot-linux-gnu_sdk-buildroot`
+- Knulli RG35XX Plus/H/SP/2024 toolchain `rg35xx-plush-sdk-20240421/aarch64-buildroot-linux-gnu_sdk-buildroot`
 - m8c `v1.7.8`
 
 ## Usage
 
+### On Linux/macOS:
 1. Clone this repository:
    ```shell
    git clone https://github.com/jamesMcMeex/m8c-rg35xx-knulli.git
@@ -31,29 +34,38 @@ This version builds using:
     cd m8c-rg35xx-knulli
     ```
 
-3. Build the Docker image:
+3. Run the build script:
    ```shell
-   docker build -t m8c-knulli .
+    ./build.sh
    ```
 
-4. Run the Docker container to start the build process:
-
-   For Windows (PowerShell):
+### On Windows:
+1. Clone this repository:
    ```powershell
+   git clone https://github.com/jamesMcMeex/m8c-rg35xx-knulli.git
+   ```
+
+2. Go into the directory:
+    ```powershell
+    cd m8c-rg35xx-knulli
+    ```
+
+3. Run Docker commands directly:
+   ```powershell
+   docker buildx create --name m8c-builder --driver docker-container --bootstrap
+   docker buildx use m8c-builder
+   docker buildx build --platform linux/amd64 --load -f Dockerfile.x86_64 -t m8c-knulli .
+   mkdir -p output
    docker run -v ${pwd}/output:/build/compiled m8c-knulli
    ```
 
-   For Mac/Linux:
-   ```shell
-   docker run -v $(pwd)/output:/build/compiled m8c-knulli
-   ```
-
-5. After the build process completes, you'll find the compiled files in a new `output/` directory located inside inside the source directory (`m8c-build-environment`).
+The script automatically detects system architecture on Linux/macOS and uses the appropriate build configuration. After the build process completes, you'll find the compiled files in a new `output/` directory located inside the source directory.
 
 ## What's Included
 
-- `Dockerfile`: Sets up the build environment with necessary dependencies.
-- `build_script.sh`: Automates the process of building m8c, compiling kernel modules, and preparing the startup script.
+- `build.sh`: Main build script that detects architecture and manages the build process
+- `Dockerfile.arm64` and `Dockerfile.x86_64`: Sets up the build environment for different architectures
+- `build_script.arm64.sh` and `build_script.x86_64.sh`: Architecture-specific build scripts
 
 ## Build Process
 
@@ -79,20 +91,53 @@ After a successful build, you'll find the following in the `output` directory:
 - Drop the `m8c` folder and the `m8c.sh` script into this location
 - (Optional) Add the m8c application to the `gamelist.xml` file to make it a bit more pretty in the Knulli UI
 
-## Customization
-You could modify the `Dockerfile` and `build_script.sh` to adjust the build process according to your needs. For example, you can change the kernel version, the toolchain used for , or M8C repository URL.
-
 ## Troubleshooting
-If you encounter any issues during the build process:
 
-1. Ensure you have a stable internet connection for downloading dependencies.
-2. Check that you have the latest version of Docker installed.
-3. Verify that you have sufficient disk space for the build process.
+If you encounter issues running m8c on your device, here are some common problems and solutions:
 
-If problems persist, please open an issue in this repository with detailed information about the error you're experiencing. I will try to help but I am a frontend engineer and a Linux noob!
+### "Permission denied" Errors
+When you see "Permission denied" or the app won't launch:
+
+1. Make sure both files are executable by running these commands in the ports/m8c directory:
+   ```bash
+   chmod +x m8c.sh
+   chmod +x m8c/m8c
+   ```
+
+2. For kernel module loading issues, you may need to set correct permissions:
+   ```bash
+   chmod 644 m8c/*.ko
+   ```
+
+### "Failed to start PipeWire loopback" Error
+If you get audio-related errors:
+
+1. First make sure your M8 is properly connected via USB
+2. Try unplugging and reconnecting your M8
+3. If the error persists, you may need to restart your device
+
+### Getting Help
+If you're still having issues:
+1. Check existing [Issues](https://github.com/jamesMcMeex/m8c-rg35xx-knulli/issues) to see if others have solved your problem
+2. When creating a new issue, please include:
+   - Your device model (RG35XX+, RG35XXSP, etc.)
+   - The exact error message you're seeing
+   - Steps you've already tried
+
+## Customization
+You can modify the build process by adjusting any of these files:
+- Architecture-specific Dockerfiles (`Dockerfile.arm64`, `Dockerfile.x86_64`) to change the build environment
+- Build scripts (`build_script.arm64.sh`, `build_script.x86_64.sh`) to modify the build process
+- Main build script (`build.sh`) to change how architecture detection and Docker builds are handled
+
+Common customizations include:
+- Changing the kernel version
+- Using a different toolchain
+- Updating the M8C repository URL or version
+- Modifying kernel module configurations
 
 ## Contributing
-Contributions to improve the build process or extend functionality are welcome. Please fork the repository, make your changes, and submit a pull request.
+Feel free to fork the repository, make your changes, and submit a pull request.
 
 ## Acknowledgments
 - [DirtyWave](https://dirtywave.com/) for creating the M8 tracker
@@ -103,3 +148,10 @@ Contributions to improve the build process or extend functionality are welcome. 
 
 ## License
 [MIT License](LICENSE.md)
+```
+
+The main changes are:
+1. Split Usage section into Linux/macOS and Windows instructions
+2. Added detailed Windows commands since build.sh won't work directly
+3. Updated Customization section to reflect multiple configuration files
+4. Maintained all other recent improvements
