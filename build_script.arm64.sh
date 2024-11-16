@@ -2,13 +2,22 @@
 
 set -e
 
-# Ensure we're in the right directory
 cd /build
 
 # Create output directory (in case it wasn't created by Docker)
 mkdir -p /build/compiled/m8c
 
+# Build m8c
+echo "Building m8c..."
+cd /build/m8c
+make VERBOSE=1
+if [ $? -ne 0 ]; then
+  echo "m8c build failed"
+  exit 1
+fi
+
 # Build kernel modules
+echo "Building kernel modules..."
 cd /build/linux-4.9.170
 
 echo "Configuring kernel..."
@@ -17,50 +26,29 @@ sed -i 's/# CONFIG_SND_USB_AUDIO is not set/CONFIG_SND_USB_AUDIO=m/g' .config
 sed -i 's/# CONFIG_USB_ACM is not set/CONFIG_USB_ACM=m/g' .config
 
 sed -i 's/^YYLTYPE yylloc;$/extern YYLTYPE yylloc;/g' scripts/dtc/dtc-lexer.lex.c_shipped
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
+make ARCH=arm64 olddefconfig
+make ARCH=arm64 modules_prepare
 
 echo "Building kernel modules..."
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M=drivers/usb/class
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M=sound/core
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M=sound/usb
-
-cd /build
-
-# Setup toolchain
-echo "Configuring toolchain..."
-export XTOOL=$(realpath aarch64-buildroot-linux-gnu_sdk-buildroot)
-export XHOST=aarch64-buildroot-linux-gnu
-export PATH=$PATH:$XTOOL/bin
-export SYSROOT=$XTOOL/$XHOST/sysroot
-export PKG_CONFIG_PATH=$SYSROOT/usr/lib/pkgconfig
-export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
-
-# Build m8c
-echo "Building m8c..."
-cd /build/m8c
-make CC=$XHOST-gcc VERBOSE=1
-if [ $? -ne 0 ]; then
-    echo "m8c build failed"
-    exit 1
-fi
-cd /build
+make ARCH=arm64 M=drivers/usb/class
+make ARCH=arm64 M=sound/core
+make ARCH=arm64 M=sound/usb
 
 # Collect files
 echo "Collecting files..."
 
 # Copy kernel modules
 for module in cdc-acm.ko snd-hwdep.ko snd-usbmidi-lib.ko snd-usb-audio.ko; do
-    find /build/linux-4.9.170 -name "$module" -exec cp -v {} /build/compiled/m8c \; || echo "Warning: $module not found"
+  find /build/linux-4.9.170 -name "$module" -exec cp -v {} /build/compiled/m8c \; || echo "Warning: $module not found"
 done
 
 # Copy m8c executable
 if [ -f "/build/m8c/m8c" ]; then
-    cp -v /build/m8c/m8c /build/compiled/m8c
-    echo "Copied m8c executable"
+  cp -v /build/m8c/m8c /build/compiled/m8c
+  echo "Copied m8c executable"
 else
-    echo "Error: m8c executable not found"
-    exit 1
+  echo "Error: m8c executable not found"
+  exit 1
 fi
 
 # Create m8c.sh script
@@ -96,8 +84,8 @@ check_build_output() {
     # Check m8c executable
     if [ -f "/build/compiled/m8c/m8c" ]; then
         file_type=$(file /build/compiled/m8c/m8c)
-        if [[ $file_type == *"ELF 64-bit LSB executable, ARM aarch64"* ]]; then
-            echo "✓ m8c executable present and valid"
+        if [[ $file_type == *"ARM aarch64"* && $file_type == *"LSB"* && $file_type == *"executable"* ]]; then
+            echo "✓ m8c executable present and valid ($(basename "$file_type"))"
         else
             echo "✗ m8c executable present but may be invalid: $file_type"
             ((error_count++))
