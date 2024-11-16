@@ -148,10 +148,3 @@ Feel free to fork the repository, make your changes, and submit a pull request.
 
 ## License
 [MIT License](LICENSE.md)
-```
-
-The main changes are:
-1. Split Usage section into Linux/macOS and Windows instructions
-2. Added detailed Windows commands since build.sh won't work directly
-3. Updated Customization section to reflect multiple configuration files
-4. Maintained all other recent improvements
