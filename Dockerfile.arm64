@@ -1,6 +1,8 @@
 FROM --platform=linux/arm64 ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LINUX_KERNEL_VERSION=4.9.170
+ENV M8C_VERSION=1.7.10
 
 # Update and install required packages
 RUN apt-get update && apt-get install -y \
@@ -27,14 +29,14 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /build
 
 # Download and extract Linux kernel
-RUN wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.9.170.tar.gz && \
-    tar -xzf linux-4.9.170.tar.gz && \
-    rm linux-4.9.170.tar.gz
+RUN wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${LINUX_KERNEL_VERSION}.tar.gz && \
+    tar -xzf linux-${LINUX_KERNEL_VERSION}.tar.gz && \
+    rm linux-${LINUX_KERNEL_VERSION}.tar.gz
 
 # Clone m8c directly
 RUN git clone https://github.com/laamaa/m8c.git && \
     cd m8c && \
-    git checkout v1.7.8
+    git checkout v${M8C_VERSION}
 
 # Download Knulli Linux config file
 RUN wget -O linux-sunxi64-legacy.config https://raw.githubusercontent.com/knulli-cfw/distribution/knulli-main/board/batocera/allwinner/h700/linux-sunxi64-legacy.config

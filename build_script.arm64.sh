@@ -18,7 +18,7 @@ fi
 
 # Build kernel modules
 echo "Building kernel modules..."
-cd /build/linux-4.9.170
+cd /build/linux-$LINUX_KERNEL_VERSION
 
 echo "Configuring kernel..."
 cp /build/linux-sunxi64-legacy.config .config
@@ -39,7 +39,7 @@ echo "Collecting files..."
 
 # Copy kernel modules
 for module in cdc-acm.ko snd-hwdep.ko snd-usbmidi-lib.ko snd-usb-audio.ko; do
-  find /build/linux-4.9.170 -name "$module" -exec cp -v {} /build/compiled/m8c \; || echo "Warning: $module not found"
+  find /build/linux-$LINUX_KERNEL_VERSION -name "$module" -exec cp -v {} /build/compiled/m8c \; || echo "Warning: $module not found"
 done
 
 # Copy m8c executable
@@ -52,7 +52,7 @@ else
 fi
 
 # Create m8c.sh script
-cat <<'EOF' >/build/compiled/m8c.sh
+sed "s/\$LINUX_KERNEL_VERSION/$LINUX_KERNEL_VERSION/" <<'EOF' >/build/compiled/m8c.sh
 #!/bin/sh
 
 export HOME=$(dirname $(realpath $0))/m8c
@@ -61,7 +61,7 @@ cd $HOME
 # Ensure m8c is executable
 chmod +x ./m8c
 
-cp *.ko /lib/modules/4.9.170
+cp *.ko /lib/modules/$LINUX_KERNEL_VERSION
 depmod
 modprobe -a cdc-acm snd-hwdep snd-usbmidi-lib snd-usb-audio
 
