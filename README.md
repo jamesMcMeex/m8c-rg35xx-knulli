@@ -19,7 +19,7 @@ The idea behind this is to provide a platform that makes it relatively easy for 
 This version builds using:
 - Linux kernel `v4.9.170`
 - Knulli RG35XX Plus/H/SP/2024 toolchain `rg35xx-plush-sdk-20240421/aarch64-buildroot-linux-gnu_sdk-buildroot`
-- m8c `v1.7.8`
+- m8c `v1.7.10`
 
 ## Usage
 
