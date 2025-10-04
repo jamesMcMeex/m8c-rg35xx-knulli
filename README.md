@@ -2,9 +2,9 @@
 
 This repository contains a Dockerfile and build script for compiling the [m8c](https://github.com/laamaa/m8c) client for the [DirtyWave M8 Headless](https://github.com/Dirtywave/M8HeadlessFirmware) firmware and necessary kernel modules for Anbernic's Linux-based handheld console devices based on the Allwinner h700 chip. Broadly, these are the RG35XX* & RG40XX* devices
 
-_Note on IRL Anbernic device tests: I have only tested this on an Anbernic RG35XXSP & RG40XXV myself, but others in the Discord community have basically run this on other RG35XX* & RG40XX* devices_
+_Note on IRL Anbernic device tests: I have only tested this on an Anbernic RG35XXSP & RG40XXV myself, but others in the Discord community have basically run this on other RG35XX* & RG40XX* devices._
 
-_Note on custom firmware on ANbernic device: This uses tooling from the Knulli CFW project. It might work on other custom firmwares, but I haven't tested them (yet)_
+_Note on custom firmware on Anbernic device: This uses tooling from the Knulli CFW project. It might work on other custom firmwares, but I haven't tested them (yet)._
 
 ## Overview
 
